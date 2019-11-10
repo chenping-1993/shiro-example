@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Insert title here</title>
+</head>
+<body>
+<form action="toLogin">
+
+    用户名：<input name="name" type="text"/>
+    <br>
+    密 码：<input name="password" type="password"/><br>
+    <input type="submit" value="登录"><br>
+    <font color="red"><th:text="${msg}"></th:text></font>
+    <h3 th:text="${msg}" style="color: red"></h3>
+
+</form>
+</body>
+</html>
