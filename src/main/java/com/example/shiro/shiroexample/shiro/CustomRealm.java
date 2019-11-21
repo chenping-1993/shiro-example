@@ -2,13 +2,11 @@ package com.example.shiro.shiroexample.shiro;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.shiro.shiroexample.entity.User;
+import com.example.shiro.shiroexample.enums.SessionConst;
 import com.example.shiro.shiroexample.mapper.RoleMapper;
 import com.example.shiro.shiroexample.mapper.UserMapper;
 import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authc.AuthenticationException;
-import org.apache.shiro.authc.AuthenticationInfo;
-import org.apache.shiro.authc.AuthenticationToken;
-import org.apache.shiro.authc.SimpleAuthenticationInfo;
+import org.apache.shiro.authc.*;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.realm.AuthorizingRealm;
@@ -37,6 +35,9 @@ public class CustomRealm extends AuthorizingRealm {
 
     @Autowired
     RoleMapper roleMapper;
+
+    @Autowired
+    ShiroSessionService shiroSessionService;
     /**
      * 授权
      * @param principalCollection
@@ -74,15 +75,16 @@ public class CustomRealm extends AuthorizingRealm {
 
 
         //通过用户名去数据库获取用户信息
-        String databasePassword = getPassword(userName);
+        User user = getUser(userName);
 
-        if (StringUtils.isEmpty(databasePassword)) {
-            return null;
+        if (null == user) {
+            throw new UnknownAccountException();
         }
         String realName = this.getName();
 
         /**
          * 实现，一个账号只能同时一个用户登录
+         * 需要设置自定义shiroSessionManager
          */
         DefaultWebSecurityManager securityManager = (DefaultWebSecurityManager) SecurityUtils.getSecurityManager();
         DefaultWebSessionManager sessionManager = (DefaultWebSessionManager) securityManager.getSessionManager();
@@ -93,33 +95,51 @@ public class CustomRealm extends AuthorizingRealm {
             }
         }
 
-        SimpleAuthenticationInfo simpleAccountRealm = new SimpleAuthenticationInfo(userName,databasePassword,realName);
+        SimpleAuthenticationInfo simpleAccountRealm = new SimpleAuthenticationInfo(userName,user.getPassword(),realName);
 
         /**
-         * 保存session值，稍后开发
+         * 保存session值
          */
+        this.setSessionValue(user);
+//        Session session = SecurityUtils.getSubject().getSession();
+//        session.setAttribute("user",user);
+
         return simpleAccountRealm;
     }
 
     /**
-     * 根据用户名查询用户密码
+     * @Description:  设置用户session
+     * @param: mgmtUser
+     * @return: void
+     * @Author: chenping
+     * @Date: 2019/11/20
+     */
+    private void setSessionValue(User mgmtUser) {
+        Session session = shiroSessionService.getSession();
+        Integer userId = mgmtUser.getId();
+        String userName = mgmtUser.getName();
+//        Integer roleId = mgmtUser.getType();
+//        Integer ownerCode = Integer.parseInt(mgmtUser.getOwnerCode());
+//        String partnerId = mgmtUser.getPartnerId();
+        session.setAttribute(SessionConst.SESSION_USER_ID, userId);
+        session.setAttribute(SessionConst.SESSION_USER_NAME, userName);
+//        session.setAttribute(SessionConst.SESSION_ROLE_ID, roleId);
+//        session.setAttribute(SessionConst.SESSION_OWNER_CODE, ownerCode);
+//        session.setAttribute(SessionConst.SESSION_PARTNER_ID, partnerId);
+    }
+
+    /**
+     * 根据用户名查询用户
      * @param userName
      * @return
      */
-    private String getPassword(String userName) {
-        /**
-         * 模拟数据库值
-         */
-//        Map<String,String> map = new HashMap<>();
-//        map.put("jack","111111");
-//        map.put("tom","111111");
-//        return map.get(userName);
+    private User getUser(String userName) {
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("name",userName);
         if (null == userMapper.selectOne(queryWrapper)) {
             return null;
         }
-        return userMapper.selectOne(queryWrapper).getPassword();
+        return userMapper.selectOne(queryWrapper);
     }
 
     /**
@@ -135,7 +155,7 @@ public class CustomRealm extends AuthorizingRealm {
     }
 
     /**
-     * 模拟数据库权限值
+     * 获取数据库权限值
      * @param userName
      * @return
      */

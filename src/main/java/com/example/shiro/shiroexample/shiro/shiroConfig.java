@@ -1,9 +1,12 @@
 package com.example.shiro.shiroexample.shiro;
 
 import org.apache.shiro.cache.ehcache.EhCacheManager;
+import org.apache.shiro.session.mgt.SessionManager;
+import org.apache.shiro.session.mgt.eis.EnterpriseCacheSessionDAO;
 import org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor;
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
+import org.apache.shiro.web.servlet.SimpleCookie;
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -41,11 +44,11 @@ public class shiroConfig {
         //拦截页面
         fMap.put("/one", "authc");
         fMap.put("/two", "authc");
+        fMap.put("/test/**", "anon");
 
-
-        //拦截未授权
-        fMap.put("/one", "perms[user:one]");
-        fMap.put("/two", "perms[user:two]");
+        //拦截未授权，赋予权限在realm授权方法中
+        fMap.put("/one", "perms[user:one]");//one接口只有  user:one 的权限
+        fMap.put("/two", "perms[user:two]");// two接口只有 user:two 的权限
         //被拦截返回登录页面
         shiroFilterFactoryBean.setLoginUrl("/login");
         //授权拦截返回页面
@@ -61,8 +64,24 @@ public class shiroConfig {
     public DefaultWebSecurityManager getDefaultWebSecurityManager() {
         DefaultWebSecurityManager defaultWebSecurityManager = new DefaultWebSecurityManager();
         defaultWebSecurityManager.setRealm(customRealm());
+        defaultWebSecurityManager.setSessionManager(sessionManager());
         return defaultWebSecurityManager;
 
+    }
+
+    @Bean
+    public SessionManager sessionManager() {
+        ShiroSessionManager sessionManager = new ShiroSessionManager();
+        sessionManager.setGlobalSessionTimeout(86400000L);
+        sessionManager.setDeleteInvalidSessions(true);
+        sessionManager.setSessionValidationSchedulerEnabled(false);
+        // 这里可以不设置。Shiro有默认的session管理。如果缓存为Redis则需改用Redis的管理
+        sessionManager.setSessionDAO(new EnterpriseCacheSessionDAO());
+        // 重新设置cookie
+        SimpleCookie cookie = new SimpleCookie();
+        cookie.setName("AUDIT_JSESSID");
+        sessionManager.setSessionIdCookie(cookie);
+        return sessionManager;
     }
 
     /**

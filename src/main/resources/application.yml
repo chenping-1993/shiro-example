@@ -13,7 +13,7 @@ spring:
 #      password: root
 
   thymeleaf:
-    #ª∫≥Âµƒ≈‰÷√
+    #config cache
     cache: false
     prefix: classpath:/templates/
     suffix: .html
