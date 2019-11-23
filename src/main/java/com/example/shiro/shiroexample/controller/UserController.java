@@ -1,5 +1,7 @@
 package com.example.shiro.shiroexample.controller;
 
+import com.example.shiro.shiroexample.common.annotion.noUserValidate;
+import com.example.shiro.shiroexample.common.aop.AdminUser;
 import com.example.shiro.shiroexample.entity.User;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.*;
@@ -21,15 +23,16 @@ public class UserController {
      * @return
      */
     @RequestMapping("one")
-    public ModelAndView getOne(){
+    public ModelAndView getOne(AdminUser adminUser){
         ModelAndView mv = new ModelAndView("one");
         return mv;
     }
     @RequestMapping("two")
-    public ModelAndView getTwo(){
+    public ModelAndView getTwo(AdminUser adminUser){
         ModelAndView mv = new ModelAndView("two");
         return mv;
     }
+    @noUserValidate//不需要获取 AdminUser
     @RequestMapping("login")
     public ModelAndView login(){
         ModelAndView mv = new ModelAndView("login");
@@ -40,12 +43,14 @@ public class UserController {
      * 若是没有页面权限，进入无权限提示页面
      * @return
      */
+    @noUserValidate
     @RequestMapping("permission")
     public ModelAndView permission(){
         ModelAndView mv = new ModelAndView("permission");
         return mv;
     }
 
+    @noUserValidate
     @RequestMapping("toLogin")
     public ModelAndView toLogin(User user){
 

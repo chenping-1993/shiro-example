@@ -1,4 +1,4 @@
-package com.example.shiro.shiroexample.common;
+package com.example.shiro.shiroexample.common.aop;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

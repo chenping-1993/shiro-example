@@ -1,6 +1,6 @@
 package com.example.shiro.shiroexample.controller;
 
-import com.example.shiro.shiroexample.common.AdminUser;
+import com.example.shiro.shiroexample.common.annotion.noUserValidate;
 import com.example.shiro.shiroexample.entity.User;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.SecurityUtils;
@@ -28,9 +28,9 @@ public class TestController {
      * @Author: chenping
      * @Date: 2019/11/21
      */
+    @noUserValidate
     @RequestMapping(value = "/test", method = RequestMethod.GET)
-    public ModelAndView pay(String ticket, AdminUser adminUser) {
-        log.info("AdminUser: {}",adminUser);
+    public ModelAndView test() {
         String loginName = (String) SecurityUtils.getSubject().getPrincipal();
         Session session = SecurityUtils.getSubject().getSession();
         User user = (User) session.getAttribute("user");

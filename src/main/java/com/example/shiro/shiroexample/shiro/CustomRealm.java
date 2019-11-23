@@ -16,8 +16,6 @@ import org.apache.shiro.subject.support.DefaultSubjectContext;
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
 import org.apache.shiro.web.session.mgt.DefaultWebSessionManager;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.StringUtils;
-
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
