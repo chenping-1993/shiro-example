@@ -43,7 +43,7 @@ public class AdminUserAop {
      * @Author: chenping
      * @Date: 2019/11/23
      */
-    @Pointcut("execution(* com.example.shiro.shiroexample.controller..*.*(..))")
+    @Pointcut("execution(public * com.example.shiro.shiroexample.controller..*.*(..))")
     public void allControllerMethod() {
 
     }
