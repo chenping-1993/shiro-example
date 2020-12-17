@@ -40,14 +40,15 @@ public class shiroConfig {
            user:当登入操作时不做检查
          */
         Map<String, String> fMap = new HashMap<String, String>();
-        //拦截页面
-        fMap.put("/one", "authc");
-        fMap.put("/two", "authc");
+        //拦截页面      默认拦截所有的页面和操作
+//        fMap.put("/**", "authc");
+//        fMap.put("/one", "authc");
+//        fMap.put("/two", "authc");
         fMap.put("/test/**", "anon");
 
-        //拦截未授权，赋予权限在realm授权方法中
-        fMap.put("/one", "perms[user:one]");//one接口只有  user:one 的权限
-        fMap.put("/two", "perms[user:two]");// two接口只有 user:two 的权限
+        //拦截未授权，赋予权限在realm授权方法中 若是此处配置的权限小于等于登陆用户拥有的权限则可以访问，否则不能访问
+//        fMap.put("/one", "perms[update:add]");//one接口有  update和add 的权限     登陆用户如果包含此权限则可以访问，否则不能访问
+//        fMap.put("/two", "perms[view:select]");// two接口有 view:delete 的权限
         //被拦截返回登录页面
         shiroFilterFactoryBean.setLoginUrl("/login");
         //授权拦截返回页面

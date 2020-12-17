@@ -2,7 +2,11 @@ package com.example.shiro.shiroexample.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.example.shiro.shiroexample.entity.Role;
-import com.example.shiro.shiroexample.entity.User;
+import com.example.shiro.shiroexample.service.provider.SelectDataProvider;
+import org.apache.ibatis.annotations.SelectProvider;
+
+import java.util.List;
+import java.util.Set;
 
 /**
  * @Author: chenping
@@ -11,30 +15,10 @@ import com.example.shiro.shiroexample.entity.User;
 //@Repository
 public interface RoleMapper extends BaseMapper<Role> {
 
-//    /**
-//     * 无参自定义mybatis
-//     *
-//     * @return
-//     */
-//    List<ScoreResp> selectScoreAndName();
-//
-//    /**
-//     * 有参自定义mybatis
-//     * mybatis-plus 参数--QueryWrapper
-//     *
-//     * @param wrapper
-//     * @return
-//     */
-//    List<ScoreResp> selectScoreAndNameByParams(@Param(Constants.WRAPPER) Wrapper<ScoreReq> wrapper);
-//
-//    /**
-//     * 有参自定义mybatis
-//     * 自定义请求参数
-//     *
-//     * @param params
-//     * @return
-//     */
-//    List<ScoreResp> selectScoreAndNameByParams1(@Param("params") ScoreReq params);
+    @SelectProvider(type = SelectDataProvider.class, method = "selectRoleNamesSql")
+    List<String> selectRoleNames(String userName);
 
+    @SelectProvider(type = SelectDataProvider.class, method = "selectPermissionsSql")
+    Set<String> selectPermissions(String userName);
 
 }

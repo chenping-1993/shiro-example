@@ -5,6 +5,7 @@ import com.example.shiro.shiroexample.entity.User;
 import com.example.shiro.shiroexample.enums.SessionConst;
 import com.example.shiro.shiroexample.mapper.RoleMapper;
 import com.example.shiro.shiroexample.mapper.UserMapper;
+import com.example.shiro.shiroexample.service.RoleService;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.*;
 import org.apache.shiro.authz.AuthorizationInfo;
@@ -22,7 +23,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * 自定义 shiro
+ * 自定义 shiro Realm
  * @Author: chenping
  * @Date: 2019/8/18
  */
@@ -35,9 +36,12 @@ public class CustomRealm extends AuthorizingRealm {
     RoleMapper roleMapper;
 
     @Autowired
+    RoleService roleService;
+
+    @Autowired
     ShiroSessionService shiroSessionService;
     /**
-     * 授权
+     * 授权   登陆后（认证通过后）访问某个功能或者菜单做授权
      * @param principalCollection
      * @return
      */
@@ -58,7 +62,7 @@ public class CustomRealm extends AuthorizingRealm {
 
 
     /**
-     * 认证
+     * 认证--- 首次登陆的时候做认证操作
      * 用户名、密码
      * @param authenticationToken
      * @return
@@ -82,6 +86,7 @@ public class CustomRealm extends AuthorizingRealm {
 
         /**
          * 实现，一个账号只能同时一个用户登录
+         * 在一个浏览器登陆后，再在其他浏览器或其他地方登陆会将之前的登陆状态销毁，之前登陆的用户再次点击菜单会回到登陆页面
          * 需要设置自定义shiroSessionManager
          */
         DefaultWebSecurityManager securityManager = (DefaultWebSecurityManager) SecurityUtils.getSecurityManager();
@@ -141,36 +146,25 @@ public class CustomRealm extends AuthorizingRealm {
     }
 
     /**
-     * 模拟数据库角色值
+     * 获取用户的角色值
      * @param userName
      * @return
      */
     private Set<String> getRoleByUserName(String userName) {
-        Set<String> roles = new HashSet<>();
-        roles.add("admin");
-        roles.add("normalUser");
+        List<String> names = roleService.selectRoleNames(userName);
+        Set<String> roles = new HashSet<>(names);
+
         return roles;
     }
 
     /**
-     * 获取数据库权限值
+     * 获取登陆用户的所有权限
      * @param userName
      * @return
      */
     private Set<String> getPermissionsByUserName(String userName) {
-        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("name",userName);
-        List<User> userList = userMapper.selectList(queryWrapper);
-        if (null == userList) {
-            return null;
-
-        }
-        Set<String> permissions = new HashSet<>();
-        for (User user : userList) {
-            if (null != user.getPerms()) {
-                permissions.add(user.getPerms());
-            }
-        }
+        Set<String> permissions = roleService.selectPermissions(userName);
         return permissions;
+
     }
 }

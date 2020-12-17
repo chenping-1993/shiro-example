@@ -2,6 +2,7 @@ package com.example.shiro.shiroexample.controller;
 
 import com.example.shiro.shiroexample.common.annotion.noUserValidate;
 import com.example.shiro.shiroexample.common.aop.AdminUser;
+import com.example.shiro.shiroexample.common.util.StringUtils;
 import com.example.shiro.shiroexample.entity.User;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.*;
@@ -55,6 +56,9 @@ public class UserController {
     public ModelAndView toLogin(User user){
 
         ModelAndView mv = new ModelAndView("login");
+        if (StringUtils.isEmpty(user)) {
+            return mv;
+        }
 //        ModelAndView mv;
         //System.out.println(newUser.getName()+newUser.getPassword());
         //shiro用户认证
@@ -65,7 +69,7 @@ public class UserController {
         //执行登录方法,用捕捉异常去判断是否登录成功
         try {
             subject.login(userToken);
-            mv = new ModelAndView("sse");
+            mv = new ModelAndView("index");
             return mv;
         } catch (UnknownAccountException e) {
             //用户名不存在
