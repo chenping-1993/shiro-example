@@ -43,12 +43,13 @@ public class shiroConfig {
         //拦截页面
         fMap.put("/test/**", "anon");
         fMap.put("/toLogin", "anon");
+        fMap.put("/logout", "logout");//退出登陆
         fMap.put("/static/**", "anon");
         fMap.put("/**", "authc");
 
         //拦截未授权，赋予权限在realm授权方法中 若是此处配置的权限小于等于登陆用户拥有的权限则可以访问，否则不能访问
-//        fMap.put("/one", "perms[update:add]");//one接口有  update和add 的权限     登陆用户如果包含此权限则可以访问，否则不能访问
-//        fMap.put("/two", "perms[view:select]");// two接口有 view:delete 的权限
+        fMap.put("/one", "perms[update,add]");//one接口有  update和add 的权限     登陆用户如果包含此权限则可以访问，否则不能访问
+        fMap.put("/two", "perms[add,select,delete,update]");// two接口有 add select delete update 的权限
         //被拦截返回登录页面
         shiroFilterFactoryBean.setLoginUrl("/login");
         //授权拦截返回页面
