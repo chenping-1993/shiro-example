@@ -2,7 +2,6 @@ package com.example.shiro.shiroexample.common.aop;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import com.example.shiro.shiroexample.common.annotion.noUserValidate;
 import com.example.shiro.shiroexample.shiro.ShiroSessionService;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -13,12 +12,13 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.bind.annotation.RequestMapping;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Date;
 
 /**
- * 配置接口方法参数注入切面类
+ * 接口日志注入切面类
  * @Author: chenping
  * @Date: 2019-11-21
  */
@@ -28,7 +28,7 @@ import java.util.Date;
 public class AdminUserAop {
 
     @Autowired
-    private ShiroSessionService shiroSessionService;
+    ShiroSessionService shiroSessionService;
 
     public AdminUserAop() {
 
@@ -58,47 +58,33 @@ public class AdminUserAop {
     @SuppressWarnings("rawtypes")
     @Around("allControllerMethod()")
     public Object aroundMethod(ProceedingJoinPoint point) throws Throwable {
-        Object target = point.getTarget();
-        Object[] args = point.getArgs();
+        Object target = point.getTarget(); //拦截的实体类
+        Object[] args = point.getArgs();//拦截的方法参数
+        //拦截的方法参数类型
         Class[] parameterTypes = ((MethodSignature) point.getSignature()).getMethod().getParameterTypes();
-        String methodName = point.getSignature().getName();
-//        if(null != methodName && "PingController".equals(methodName)){
-//            Object proceed = point.proceed(args);
-//            return proceed;
-//        }
-        Method method = target.getClass().getMethod(methodName, parameterTypes);
+        String methodName = point.getSignature().getName();//拦截的方法名称
+
+        Method method = target.getClass().getMethod(methodName, parameterTypes);//通过反射获得拦截的method
         Date now = new Date();
+        RequestMapping request = method.getAnnotation(RequestMapping.class);
+        if (!StringUtils.isEmpty(request)) {
+            log.info("调用接口：{}", Arrays.toString(request.value()));
+        }
         long beginTime = System.currentTimeMillis();
-        log.info("开始调用类: {}, 方法: {}, 时间: {}", point.getSignature().getDeclaringTypeName(), methodName,
+        log.info("开始调用: {}.{}, 时间: {}", point.getSignature().getDeclaringTypeName(), methodName,
                 now);
-        // 自定义注解(筛选是否不需要用户校验)
-        noUserValidate pass = method.getAnnotation(noUserValidate.class);
-        if (!StringUtils.isEmpty(pass)) {
-            // 方法有此注解,不查询用户信息
-            long endTime = System.currentTimeMillis();
-            log.info("结束调用类: {}, 方法: {}, 总耗时: {} ms", point.getSignature().getDeclaringTypeName(), methodName,
-                    endTime - beginTime);
-            return point.proceed(args);
-        }
+
         // 封装用户信息
-        Integer userId = shiroSessionService.getUserId();
-        String userName = shiroSessionService.getUserName();
-        Integer userType = shiroSessionService.getRoleId();
-        if (userId == null || StringUtils.isEmpty(userName)) {
-            return new ModelAndView("login");
-        }
-        AdminUser userVo = new AdminUser();
-        userVo.setUserId(userId);
-        userVo.setAdminUsername(userName);
-        userVo.setUserType(userType);
-        args[0] = userVo;//在方法的第一个参数放入 AdminUser userVo
-        Object proceed = point.proceed(args);
+        String loginUserName = shiroSessionService.getUserName();
+        log.info("操作用户：{}",loginUserName);
+//        args[0] = userVo;//在方法的第一个参数放入 AdminUser userVo
+        Object proceed = point.proceed();
         long endTime = System.currentTimeMillis();
         // 接口调用时间log
-        log.info("结束调用类: {}, 方法: {}, 总耗时: {} ms", point.getSignature().getDeclaringTypeName(), methodName,
+        log.info("结束调用 {}.{}, 总耗时: {} ms", point.getSignature().getDeclaringTypeName(), methodName,
                 endTime - beginTime);
         // 返回值log
-        log.info("接口返回返回结果: {}", JSON.toJSONString(proceed, SerializerFeature.WriteNullStringAsEmpty));
+        log.info("接口返回结果: {}", JSON.toJSONString(proceed, SerializerFeature.WriteNullStringAsEmpty));
         return proceed;
     }
 

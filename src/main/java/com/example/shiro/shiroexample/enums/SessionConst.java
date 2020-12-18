@@ -19,7 +19,11 @@ public enum SessionConst {
     /**
      * 角色ID
      */
-    SESSION_ROLE_ID ("session_role_id");
+    SESSION_ROLE_ID ("session_role_id"),
+    /**
+     * 用户实体
+     */
+    SESSION_USER ("session_user");
 
     private String msg;
 

@@ -92,20 +92,21 @@ public class CustomRealm extends AuthorizingRealm {
         DefaultWebSecurityManager securityManager = (DefaultWebSecurityManager) SecurityUtils.getSecurityManager();
         DefaultWebSessionManager sessionManager = (DefaultWebSessionManager) securityManager.getSessionManager();
         Collection<Session> sessions = sessionManager.getSessionDAO().getActiveSessions();
-        for (Session session : sessions) {
-            if (userName.equals(String.valueOf(session.getAttribute(DefaultSubjectContext.PRINCIPALS_SESSION_KEY)))) {
-                sessionManager.getSessionDAO().delete(session);
+        //在一个浏览器中，登陆之后再次登陆不移除session，移除会报错误
+        if (sessions.size() > 1) {
+            for (Session session : sessions) {
+                if (userName.equals(String.valueOf(session.getAttribute(DefaultSubjectContext.PRINCIPALS_SESSION_KEY)))) {
+                    sessionManager.getSessionDAO().delete(session);
+                }
             }
         }
 
         SimpleAuthenticationInfo simpleAccountRealm = new SimpleAuthenticationInfo(userName,user.getPassword(),realName);
 
         /**
-         * 保存session值
+         * 保存登陆认证后的信息session值
          */
         this.setSessionValue(user);
-//        Session session = SecurityUtils.getSubject().getSession();
-//        session.setAttribute("user",user);
 
         return simpleAccountRealm;
     }
@@ -126,6 +127,7 @@ public class CustomRealm extends AuthorizingRealm {
 //        String partnerId = mgmtUser.getPartnerId();
         session.setAttribute(SessionConst.SESSION_USER_ID, userId);
         session.setAttribute(SessionConst.SESSION_USER_NAME, userName);
+        session.setAttribute(SessionConst.SESSION_USER, mgmtUser);
 //        session.setAttribute(SessionConst.SESSION_ROLE_ID, roleId);
 //        session.setAttribute(SessionConst.SESSION_OWNER_CODE, ownerCode);
 //        session.setAttribute(SessionConst.SESSION_PARTNER_ID, partnerId);

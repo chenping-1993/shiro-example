@@ -39,12 +39,12 @@ public class shiroConfig {
            ssl:表示安全的url请求，协议为https
            user:当登入操作时不做检查
          */
-        Map<String, String> fMap = new HashMap<String, String>();
-        //拦截页面      默认拦截所有的页面和操作
-//        fMap.put("/**", "authc");
-//        fMap.put("/one", "authc");
-//        fMap.put("/two", "authc");
+        Map<String, String> fMap = new HashMap<>();
+        //拦截页面
         fMap.put("/test/**", "anon");
+        fMap.put("/toLogin", "anon");
+        fMap.put("/static/**", "anon");
+        fMap.put("/**", "authc");
 
         //拦截未授权，赋予权限在realm授权方法中 若是此处配置的权限小于等于登陆用户拥有的权限则可以访问，否则不能访问
 //        fMap.put("/one", "perms[update:add]");//one接口有  update和add 的权限     登陆用户如果包含此权限则可以访问，否则不能访问

@@ -1,5 +1,6 @@
 package com.example.shiro.shiroexample.shiro;
 
+import com.example.shiro.shiroexample.entity.User;
 import com.example.shiro.shiroexample.enums.SessionConst;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.session.Session;
@@ -35,6 +36,12 @@ public class ShiroSessionService {
         Session session = getSession();
         String userName = (String) session.getAttribute(SessionConst.SESSION_USER_NAME);
         return userName;
+    }
+
+    public User getUser() {
+        Session session = getSession();
+        User user = (User) session.getAttribute(SessionConst.SESSION_USER);
+        return user;
     }
 
 }
