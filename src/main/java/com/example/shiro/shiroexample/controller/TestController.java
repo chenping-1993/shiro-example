@@ -34,7 +34,7 @@ public class TestController {
      * @Author: chenping
      * @Date: 2019/11/21
      */
-    @RequestMapping(value = "/test", method = RequestMethod.GET)
+    @RequestMapping(value = "/visitor", method = RequestMethod.GET)
     public ModelAndView test(String id) {
         String loginName = (String) SecurityUtils.getSubject().getPrincipal();
         log.info("loginName:{}",loginName);
