@@ -72,7 +72,7 @@ public class CustomRealm extends AuthorizingRealm {
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken) throws AuthenticationException {
         //从主体传递的认证信息中获取用户名
         String userName = (String) authenticationToken.getPrincipal();
-//        String password = (String) authenticationToken.getCredentials();
+        String password = new String((char[]) authenticationToken.getCredentials());
         
 
 
@@ -81,6 +81,9 @@ public class CustomRealm extends AuthorizingRealm {
 
         if (null == user) {
             throw new UnknownAccountException();
+        }
+        if (!password.equals(user.getPassword())) {
+            throw new IncorrectCredentialsException();
         }
         String realName = this.getName();
 

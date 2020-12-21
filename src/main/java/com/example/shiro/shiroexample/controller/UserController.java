@@ -5,6 +5,8 @@ import com.example.shiro.shiroexample.entity.User;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.*;
 import org.apache.shiro.subject.Subject;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
@@ -17,6 +19,9 @@ import org.springframework.web.servlet.ModelAndView;
 @RestController
 public class UserController {
 
+    //加密的salt
+    @Value("${md5salt}")
+    public String md5salt;
     /**
      * 登录后才可以访问页面
      * @return
@@ -66,7 +71,16 @@ public class UserController {
         //获取subject
         Subject subject = SecurityUtils.getSubject();
         //封装用户数据
-        UsernamePasswordToken userToken = new UsernamePasswordToken(user.getName(),user.getPassword());
+        //密码两次md5加密
+        String md5Password = DigestUtils.md5DigestAsHex(user.getPassword().getBytes());
+        String secondEncodePwd = DigestUtils.md5DigestAsHex((md5Password+md5salt).getBytes());
+        UsernamePasswordToken userToken = new UsernamePasswordToken(user.getName(),secondEncodePwd);
+
+        // 已经登录过了
+        if (subject.isAuthenticated()) {
+            subject.logout();
+        }
+
         //执行登录方法,用捕捉异常去判断是否登录成功
         try {
             subject.login(userToken);
